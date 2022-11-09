@@ -6,7 +6,6 @@ import { AptosClient } from 'aptos'
 
 // Setting up Aptos client
 export const AptosContext = createContext<AptosClient | null>( null );
-const aptosClient = useMemo (() => new AptosClient('https://fullnode.devnet.aptoslabs.com/v1'), []))
 
 // Setting up Livepeer Studio client
 const client = createReactClient( {
@@ -17,6 +16,8 @@ const client = createReactClient( {
 
 
 export default function App({ Component, pageProps }: AppProps) {
+  const aptosClient = useMemo( () => new AptosClient( 'https://fullnode.devnet.aptoslabs.com/v1' ), [] );
+  
   return (
     <AptosContext.Provider value={aptosClient}>
       <LivepeerConfig client={ client }>
