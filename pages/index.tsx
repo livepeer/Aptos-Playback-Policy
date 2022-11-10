@@ -2,8 +2,13 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import 'tailwindcss/tailwind.css'
+import Wallet from '../components/Wallet'
+import Stream from '../components/Stream'
+import { useStream } from '@livepeer/react'
+
 
 export default function Home() {
+
   return (
     <div className={styles.container}>
       <Head>
@@ -17,13 +22,7 @@ export default function Home() {
         <h1 className={styles.title}>
           Welcome to <span className='text-aptos-green'>Aptos</span> Playback Policy
         </h1>
-
-        <div className={styles.grid}>
-          <a href='https://nextjs.org/docs' className={styles.card}>
-            <h2>View Stream &rarr;</h2>
-            <p>View a gated stream.</p>
-          </a>
-        </div>
+        <Wallet />
       </main>
     </div>
   );
