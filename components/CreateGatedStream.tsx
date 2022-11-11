@@ -1,8 +1,9 @@
 import { useCreateStream, useStream, Player } from '@livepeer/react';
 import { useMemo, useState, useEffect } from 'react';
 
-import {useMutation} from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query';
 import { CreateSignedPlaybackBody, CreateSignedPlaybackResponse } from '../pages/api/createJWT';
+
 
 export default function CreateGatedStream() {
   // Create stream with LivepeerJS hook
@@ -17,7 +18,7 @@ export default function CreateGatedStream() {
           name: streamName,
           playbackPolicy: { type: 'jwt' },
         }
-      : null,
+      : null
   );
 
   // Getting created stream information
@@ -27,12 +28,11 @@ export default function CreateGatedStream() {
   });
 
   // Function to create JWT and get the token
-  const { mutate: createJwt, data: createdJwt } = useMutation( {
+  const { mutate: createJwt, data: createdJwt } = useMutation({
     mutationFn: async () => {
-      if ( !stream?.playbackId ) {
-        throw new Error( 'No playback Id' );
+      if (!stream?.playbackId) {
+        throw new Error('No playback Id');
       }
-    
 
       // Create stream information for JWT payload
       const body: CreateSignedPlaybackBody = {
@@ -48,35 +48,35 @@ export default function CreateGatedStream() {
 
       return response.json() as Promise<CreateSignedPlaybackResponse>;
     },
-  } );
-  
-  useEffect( () => {
-    if(stream?.playbackId ){
+  });
+
+  useEffect(() => {
+    if (stream?.playbackId) {
       createJwt();
     }
-  }, [stream?.playbackId, createJwt])
+  }, [stream?.playbackId, createJwt]);
 
   const isLoading = useMemo(() => status === 'loading', [status]);
 
   return (
-    <>
-      {!stream?.id ? (
-      <div className='overflow-hidden w-40 bg-aptos-green rounded-3xl p-2 mt-4 text-center'>
-        <button
-          onClick={() => createStream?.()}
-          disabled={isLoading || !createStream || Boolean(stream)}
-        >
-          Create Gated Stream
-        </button>
-        <input type='text' value={streamName} onChange={(e) => setStreamName(e.target.value)} />
-        </div>
-      ) : (
+      <>
+        {!stream?.id ? (
+          <div className='overflow-hidden w-40 bg-aptos-green rounded-3xl p-2 mt-4 text-center'>
+            <button
+              onClick={() => createStream?.()}
+              disabled={isLoading || !createStream || Boolean(stream)}
+            >
+              Create Gated Stream
+            </button>
+            <input type='text' value={streamName} onChange={(e) => setStreamName(e.target.value)} />
+          </div>
+        ) : (
           <Player
-            title={ stream?.name }
-            playbackId={ stream?.playbackId }
+            title={stream?.name}
+            playbackId={stream?.playbackId}
             jwt={(createdJwt as CreateSignedPlaybackResponse)?.token}
           />
-      )}
-    </>
+        )}
+      </>
   );
 }
