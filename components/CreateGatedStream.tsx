@@ -37,7 +37,7 @@ export default function CreateGatedStream() {
       // Create stream information for JWT payload
       const body: CreateSignedPlaybackBody = {
         playbackId: stream.playbackId,
-        secret: 'supersecetkey',
+        secret: 'supersecretkey',
       };
 
       const response = await fetch('/api/createJWT', {
