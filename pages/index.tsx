@@ -1,16 +1,20 @@
 import Head from 'next/head';
 import Image from 'next/image';
+import {useState} from 'react'
 import styles from '../styles/Home.module.css';
 import 'tailwindcss/tailwind.css';
-import Wallet from '../components/Wallet';
-import Stream from '../components/Stream';
-import { useStream } from '@livepeer/react';
 import CreateGatedStream from '../components/CreateGatedStream';
+import Wallet from '../components/Wallet'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
 
 const queryClient = new QueryClient();
 
 export default function Home() {
+  const [ walletAddress, setWalletAddress ] = useState();
+  console.log(walletAddress);
+  
+
   return (
     <div className={styles.container}>
       <Head>
@@ -24,10 +28,12 @@ export default function Home() {
         <h1 className={styles.title}>
           Welcome to <span className='text-aptos-green'>Aptos</span> Playback Policy
         </h1>
-        <Wallet />
-        <QueryClientProvider client={queryClient}>
-          <CreateGatedStream />
-        </QueryClientProvider>
+        <Wallet setWalletAddress={setWalletAddress} />
+        {walletAddress ? (
+          <QueryClientProvider client={queryClient}>
+            <CreateGatedStream walletAddress={ walletAddress } />
+          </QueryClientProvider>
+        ) : null} 
       </main>
     </div>
   );
