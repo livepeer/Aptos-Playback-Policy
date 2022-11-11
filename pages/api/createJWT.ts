@@ -6,7 +6,6 @@ import { NextApiRequest, NextApiResponse } from 'next'
 export type CreateSignedPlaybackBody = {
   playbackId: string;
   secret: string;
-  address: string;
 }
 
 // Set type for revieving JWT
@@ -26,7 +25,7 @@ const handler = async ( req: NextApiRequest, res: NextApiResponse ) => {
       if ( !accessControlPrivateKey || !accessControlPublicKey ) {
         return res.status( 500 ).json( { message: 'No private/public key configured.' } );
       }
-      const { playbackId, secret, address }: CreateSignedPlaybackBody = req.body;
+      const { playbackId, secret }: CreateSignedPlaybackBody = req.body;
       if ( !playbackId || !secret ) {
         return res.status( 400 ).json( { message: 'Missing data in body.' } );
       }
@@ -39,9 +38,6 @@ const handler = async ( req: NextApiRequest, res: NextApiResponse ) => {
         issuer: 'Aptos',
         playbackId,
         expiration: '1hr',
-        custom: {
-          address
-        }
       } )
       return res.status(200).json({token})
     }

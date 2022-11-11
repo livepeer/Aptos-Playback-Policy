@@ -5,6 +5,7 @@ import 'tailwindcss/tailwind.css'
 import Wallet from '../components/Wallet'
 import Stream from '../components/Stream'
 import { useStream } from '@livepeer/react'
+import CreateGatedStream from '../components/CreateGatedStream'
 
 
 export default function Home() {
@@ -23,6 +24,7 @@ export default function Home() {
           Welcome to <span className='text-aptos-green'>Aptos</span> Playback Policy
         </h1>
         <Wallet />
+        <CreateGatedStream />
       </main>
     </div>
   );
