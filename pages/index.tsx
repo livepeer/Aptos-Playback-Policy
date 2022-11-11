@@ -24,7 +24,7 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <Image src='/../public/Aptos.jpeg' alt='Aptos Logo' width={1600} height={400} />
+        <Image src='/../public/static/Aptos.jpeg' alt='Aptos Logo' width={1600} height={400} />
         <h1 className={styles.title}>
           Welcome to <span className='text-aptos-green'>Aptos</span> Playback Policy
         </h1>
