@@ -46,14 +46,12 @@ export default function Wallet({setWalletAddress}:{setWalletAddress:any})  {
 
   return (
     <>
-      <div className='overflow-hidden w-40 bg-aptos-green rounded-3xl p-2 mt-4 text-center'>
+      <div className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:outline-slate-800 text-aptos-green hover:text-gray-100 cursor-pointer'>
         <button onClick={connectWallet}>
           <p>{address ? address : 'Connect Wallet'}</p>
         </button>
       </div>
-      {/* <button onClick={getBalance}>Get amount</button> */ }
-      
-    
+      {/* <button onClick={getBalance}>Get amount</button> */}
     </>
   );
 }

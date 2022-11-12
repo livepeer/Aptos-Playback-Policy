@@ -5,7 +5,8 @@ import { useMutation } from '@tanstack/react-query';
 import { CreateSignedPlaybackBody, CreateSignedPlaybackResponse } from '../pages/api/createJWT';
 
 
-export default function CreateGatedStream({walletAddress}:{walletAddress:string}) {
+export default function CreateGatedStream( { walletAddress }: { walletAddress: string } ) {
+  const [ showInfo, setShowInfo ] = useState<boolean>( false );
   // Create stream with LivepeerJS hook
   const [streamName, setStreamName] = useState<string>('');
   const {
@@ -63,7 +64,7 @@ export default function CreateGatedStream({walletAddress}:{walletAddress:string}
     <>
       {!stream?.id ? (
         <div className='flex flex-col rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800'>
-          <label htmlFor="input">Stream Name</label>
+          <label htmlFor='input'>Stream Name</label>
           <input
             className='rounded my-3'
             type='text'
@@ -74,7 +75,7 @@ export default function CreateGatedStream({walletAddress}:{walletAddress:string}
           <button
             onClick={() => createStream?.()}
             disabled={isLoading || !createStream || Boolean(stream)}
-            className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800'
+            className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:text-aptos-green cursor-pointer'
           >
             Create Gated Stream
           </button>
@@ -91,36 +92,46 @@ export default function CreateGatedStream({walletAddress}:{walletAddress:string}
             />
           </div>
 
-          <div className='flex flex-col w-1/4'>
-            <h1 className='text-aptos-green font-bold text-xl mt-5 underline'>Stream Info</h1>
-            <div className='rounded outline outline-offset-2 outline-2 outline-aptos-green p-4 m-4 text-xl bg-slate-800 overflow-scroll'>
-              <p>
-                <span className='text-aptos-green font-bold'>Stream Name: </span>
-                {stream.name}
-              </p>
-              <p>
-                <span className='text-aptos-green font-bold'>Stream Id:</span> {stream.id}
-              </p>
-              <p>
-                <span className='text-aptos-green font-bold'>PlaybackId:</span> {stream.playbackId}
-              </p>
-              <p>
-                <span className='text-aptos-green font-bold'>Playback Policy:</span>{' '}
-                {stream.playbackPolicy?.type}
-              </p>
-              <p>
-                <span className='text-aptos-green font-bold'>Ingest Url:</span>{' '}
-                {stream.rtmpIngestUrl}
-              </p>
-              <p>
-                <span className='text-aptos-green font-bold'>Playback Url:</span>{' '}
-                {stream.playbackUrl}
-              </p>
-              <p>
-                <span className='text-aptos-green font-bold'>JWT: </span>
-                {(createdJwt as CreateSignedPlaybackResponse)?.token}
-              </p>
-            </div>
+          <button
+            onClick={()=>setShowInfo(!showInfo)}
+            className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:outline-slate-800 text-aptos-green hover:text-gray-100 cursor-pointer'
+          >
+            Stream Info
+          </button>
+          <div className='flex-flex-col w-1/4'>
+            {showInfo ? (
+              <div className='rounded outline outline-offset-2 outline-2 outline-aptos-green p-4 m-4 text-xl bg-slate-800 overflow-scroll'>
+                <p>
+                  <span className='text-aptos-green font-bold'>Stream Name: </span>
+                  {stream.name}
+                </p>
+                <p>
+                  <span className='text-aptos-green font-bold'>Stream Id:</span> {stream.id}
+                </p>
+                <p>
+                  <span className='text-aptos-green font-bold'>PlaybackId:</span>{' '}
+                  {stream.playbackId}
+                </p>
+                <p>
+                  <span className='text-aptos-green font-bold'>Playback Policy:</span>{' '}
+                  {stream.playbackPolicy?.type}
+                </p>
+                <p>
+                  <span className='text-aptos-green font-bold'>Ingest Url:</span>{' '}
+                  {stream.rtmpIngestUrl}
+                </p>
+                <p>
+                  <span className='text-aptos-green font-bold'>Playback Url:</span>{' '}
+                  {stream.playbackUrl}
+                </p>
+                <p>
+                  <span className='text-aptos-green font-bold'>JWT: </span>
+                  {(createdJwt as CreateSignedPlaybackResponse)?.token}
+                </p>
+              </div>
+            ) : (
+              <></>
+            )}
           </div>
         </>
       )}
