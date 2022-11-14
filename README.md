@@ -27,7 +27,7 @@ A guide to help utilize the Livepeer playback policy for a livesteam on the Apto
 - Install [LivepeerJS SDK](https://livepeerjs.org/)
     
     ```bash
-    npm i @livepeer/react livepeer@^1.3.0
+    npm i @livepeer/react 
     ```
     
 
