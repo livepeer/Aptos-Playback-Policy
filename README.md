@@ -55,7 +55,7 @@ components
 	- Wallet.tsx
 pages
 	- api
-			- createJWT.ts
+	  - createJWT.ts
 	- _app.tsx
 	- index.tsx
 .env
