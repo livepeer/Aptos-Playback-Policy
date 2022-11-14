@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useContext, useMemo, useRef } from 'react';
+import React, { useCallback, useState, useMemo, } from 'react';
 import { CoinClient, AptosClient, AptosAccount } from 'aptos';
 
 
