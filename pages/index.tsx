@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import Image from 'next/image';
+import aptosImage from '../public/Aptos.jpeg'
 import {useState} from 'react'
 import styles from '../styles/Home.module.css';
 import 'tailwindcss/tailwind.css';
@@ -12,7 +13,7 @@ const queryClient = new QueryClient();
 
 export default function Home() {
   const [ walletAddress, setWalletAddress ] = useState();
-  console.log(walletAddress);
+  // console.log(walletAddress);
   
 
   return (
@@ -24,7 +25,7 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <Image src='/../public/Aptos.jpeg' alt='Aptos Logo' width={1600} height={400} />
+        <Image src={aptosImage} alt='Aptos Logo' width={1000} height={400} priority/>
         <h1 className={styles.title}>
           Welcome to <span className='text-aptos-green'>Aptos</span> Playback Policy
         </h1>
