@@ -4,8 +4,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 
 export type WalletInfo = {
-  address: string | HexString;
-  walletBalance: number;
+  address: any;
+  walletBalance?: number;
 }
 
 const handler = async (req: NextApiRequest, res:NextApiResponse) => {
@@ -15,9 +15,8 @@ const handler = async (req: NextApiRequest, res:NextApiResponse) => {
 
   try {
     const method = req.method;
-    if ( method === 'GET' ) {
-      const account = aptosAccount.address();
-      const address = new AptosAccount(undefined, account)
+    if ( method === 'POST' ) {
+      const address = new AptosAccount(undefined, req.body.address)
       const balance: bigint = await coinClient.checkBalance(address as AptosAccount)
       const accountInfo = ({
         address,
@@ -25,7 +24,7 @@ const handler = async (req: NextApiRequest, res:NextApiResponse) => {
     } )
        return res.status(200).json(accountInfo)
       }
-      res.setHeader('Allow', ['GET']);
+      res.setHeader('Allow', ['POST']);
       return res.status(405).end(`Method ${method} Not Allowed`);
   } catch (error) {
     console.error(error);

@@ -13,6 +13,7 @@ export default function Home() {
   
   const queryClient = new QueryClient();
   const [walletAddress, setWalletAddress] = useState();
+  const [walletAmount, setWalletAmount] = useState();
 
   return (
     <div className={styles.container}>
@@ -28,10 +29,16 @@ export default function Home() {
           Welcome to <span className='text-aptos-green'>Aptos</span> Playback Policy
         </h1>
 
-        <Wallet setWalletAddress={setWalletAddress} />
+        <Wallet
+          setWalletAddress={ setWalletAddress }
+        //setWalletAmount={ setWalletAmount }
+        />
         {walletAddress ? (
           <QueryClientProvider client={queryClient}>
-            <CreateGatedStream walletAddress={walletAddress} />
+            <CreateGatedStream
+              walletAddress={ walletAddress }
+              //{walletAmount={walletAmount}}
+            />
           </QueryClientProvider>
         ) : null}
       </main>

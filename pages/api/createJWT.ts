@@ -30,7 +30,7 @@ const handler = async ( req: NextApiRequest, res: NextApiResponse ) => {
       if ( !playbackId || !secret ) {
         return res.status( 400 ).json( { message: 'Missing data in body.' } );
       }
-      if ( secret !== 'supersecretkey' ) {
+      if ( secret !== req.body.walletAddress ) {
         return res.status(401).json({message: 'Incorrect secret.'})
       }
       const token = await signAccessJwt( {

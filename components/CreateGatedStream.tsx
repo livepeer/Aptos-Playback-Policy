@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { CreateSignedPlaybackBody, CreateSignedPlaybackResponse } from '../pages/api/createJWT';
 
-export default function CreateGatedStream({ walletAddress }: { walletAddress: string }) {
+export default function CreateGatedStream({ walletAddress }: { walletAddress: string }, {walletAmount}: {walletAmount: any}) {
   const [showInfo, setShowInfo] = useState<boolean>(false);
   const [showStream, setShowStream] = useState<boolean>(false);
   // Create stream with LivepeerJS hook
@@ -38,7 +38,7 @@ export default function CreateGatedStream({ walletAddress }: { walletAddress: st
       // Create stream information for JWT payload
       const body: CreateSignedPlaybackBody = {
         playbackId: stream.playbackId,
-        secret: 'supersecretkey',
+        secret: walletAddress,
         walletAddress: walletAddress,
       };
 
@@ -107,7 +107,7 @@ export default function CreateGatedStream({ walletAddress }: { walletAddress: st
             </button>
           </div>
           {/* Display Stream */}
-          {showStream ? (
+          {showStream && walletAmount > 0 ? (
             <div className='w-1/4'>
               <Player
                 title={stream?.name}
