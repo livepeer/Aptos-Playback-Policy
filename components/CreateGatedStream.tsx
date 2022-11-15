@@ -4,9 +4,9 @@ import { useMemo, useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { CreateSignedPlaybackBody, CreateSignedPlaybackResponse } from '../pages/api/createJWT';
 
-
-export default function CreateGatedStream( { walletAddress }: { walletAddress: string } ) {
-  const [ showInfo, setShowInfo ] = useState<boolean>( false );
+export default function CreateGatedStream({ walletAddress }: { walletAddress: string }) {
+  const [showInfo, setShowInfo] = useState<boolean>(false);
+  const [showStream, setShowStream] = useState<boolean>(false);
   // Create stream with LivepeerJS hook
   const [streamName, setStreamName] = useState<string>('');
   const {
@@ -39,7 +39,7 @@ export default function CreateGatedStream( { walletAddress }: { walletAddress: s
       const body: CreateSignedPlaybackBody = {
         playbackId: stream.playbackId,
         secret: 'supersecretkey',
-        walletAddress: walletAddress
+        walletAddress: walletAddress,
       };
 
       const response = await fetch('/api/createJWT', {
@@ -58,7 +58,17 @@ export default function CreateGatedStream( { walletAddress }: { walletAddress: s
     }
   }, [stream?.playbackId, createJwt, walletAddress]);
 
-  const isLoading = useMemo(() => status === 'loading', [status]);
+  const isLoading = useMemo( () => status === 'loading', [ status ] );
+  
+  const viewStream = async () => {
+    setShowInfo( false )
+    setShowStream(true)
+  }
+
+   const viewStreamInfo = async () => {
+     setShowInfo(true);
+     setShowStream(false);
+   };
 
   return (
     <>
@@ -82,22 +92,33 @@ export default function CreateGatedStream( { walletAddress }: { walletAddress: s
         </div>
       ) : (
         <>
-          <h1 className='text-aptos-green font-bold text-xl my-5 underline'>Stream Preview </h1>
-          <div className='w-1/4'>
-            <Player
-              title={stream?.name}
-              playbackId={stream?.playbackId}
-              showPipButton
-              jwt={(createdJwt as CreateSignedPlaybackResponse)?.token}
-            />
+          <div>
+            <button
+              onClick={viewStream}
+              className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:outline-slate-800 text-aptos-green hover:text-gray-100 cursor-pointer'
+            >
+              View Stream
+            </button>
+            <button
+              onClick={(viewStreamInfo)}
+              className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:outline-slate-800 text-aptos-green hover:text-gray-100 cursor-pointer'
+            >
+              Stream Info
+            </button>
           </div>
+          {/* Display Stream */}
+          {showStream ? (
+            <div className='w-1/4'>
+              <Player
+                title={stream?.name}
+                playbackId={stream?.playbackId}
+                showPipButton
+                jwt={(createdJwt as CreateSignedPlaybackResponse)?.token}
+              />
+            </div>
+          ) : null}
 
-          <button
-            onClick={()=>setShowInfo(!showInfo)}
-            className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:outline-slate-800 text-aptos-green hover:text-gray-100 cursor-pointer'
-          >
-            Stream Info
-          </button>
+          {/* Display Stream Info */}
           <div className='flex-flex-col w-1/4'>
             {showInfo ? (
               <div className='rounded outline outline-offset-2 outline-2 outline-aptos-green p-4 m-4 text-xl bg-slate-800 overflow-scroll'>
