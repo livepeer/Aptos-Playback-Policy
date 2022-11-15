@@ -1,19 +1,13 @@
 import Head from 'next/head';
 import Image from 'next/image';
+import Link from 'next/link';
 import aptosImage from '../public/Aptos.jpeg'
 import {useState} from 'react'
 import styles from '../styles/Home.module.css';
 import 'tailwindcss/tailwind.css';
-import CreateGatedStream from '../components/CreateGatedStream';
-import Wallet from '../components/Wallet'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-
-const queryClient = new QueryClient();
 
 export default function Home() {
-  const [ walletAddress, setWalletAddress ] = useState();
-  // console.log(walletAddress);
   
 
   return (
@@ -25,16 +19,21 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <Image src={aptosImage} alt='Aptos Logo' width={1000} height={400} priority/>
+        <Image src={aptosImage} alt='Aptos Logo' width={1000} height={400} priority />
         <h1 className={styles.title}>
           Welcome to <span className='text-aptos-green'>Aptos</span> Playback Policy
         </h1>
-        <Wallet setWalletAddress={setWalletAddress} />
-        {walletAddress ? (
-          <QueryClientProvider client={queryClient}>
-            <CreateGatedStream walletAddress={ walletAddress } />
-          </QueryClientProvider>
-        ) : null} 
+
+        <Link href='/gateStream'>
+          <div className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:outline-slate-800 text-aptos-green hover:text-gray-100 cursor-pointer'>
+            Click to Gate Stream
+          </div>
+        </Link>
+        <Link href='/viewStream'>
+          <div className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:outline-slate-800 text-aptos-green hover:text-gray-100 cursor-pointer'>
+            Click to View Stream
+          </div>
+        </Link>
       </main>
     </div>
   );

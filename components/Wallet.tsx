@@ -1,6 +1,5 @@
-import React, { useCallback, useState, useMemo, } from 'react';
-import { CoinClient, AptosClient, AptosAccount } from 'aptos';
-
+import React, { useState, useMemo, useCallback, useEffect} from 'react';
+import { CoinClient, AptosClient, AptosAccount, AptosAccountObject } from 'aptos';
 
 declare global {
   interface Window {
@@ -11,38 +10,42 @@ declare global {
 
 export default function Wallet({setWalletAddress}:{setWalletAddress:any})  {
   const [address, setAddress] = useState<string>();
-  // const [walletAmount, setWalletAmount] = useState<Number>();
+  const [account, setAccount] = useState<AptosAccount>();
+  const [walletAmount, setWalletAmount] = useState<Number>();
+  const [walletBalance, setWalletBalance] = useState<Number>();
 
   //Checking if wallet is injected into the window object
   const isAptosDefined = useMemo(
     () => (typeof window !== 'undefined' ? Boolean(window?.aptos) : false),
     []
   );
-
-  // Using coin client to get address balance
-  const client = new AptosClient('https://fullnode.devnet.aptoslabs.com');
-  const coinClient = new CoinClient( client );
+  
 
   //Connecting the wallet
-  const connectWallet = useCallback(async () => {
+  const connectWallet = useCallback( async () => {
+    // Using coin client to get address balance
+    const client = new AptosClient('https://fullnode.devnet.aptoslabs.com');
+    const coinClient = new CoinClient( client );
     try {
       if (isAptosDefined) {
         await window.aptos.connect();
-        const account: { address: string } = await window.aptos.account();
-        setAddress( account.address );
+        const account = (await window.aptos.account()) as AptosAccountObject;
+        const accountAddress = account.address;
+        setAddress( accountAddress );
         setWalletAddress( account.address );
+        setAccount(new AptosAccount(undefined, account.address));
         console.log(account);
       }
+      const balance: bigint = await coinClient.checkBalance(account as AptosAccount);
+      setWalletAmount(Number(balance) / 10 ** 8);
+      setWalletBalance(Number(balance) / 10 ** 8);
+      console.log( walletAmount );
+      
     } catch (error) {
       console.log(error);
     }
-  }, [isAptosDefined, setWalletAddress]);
+  }, [isAptosDefined, walletAmount, account, setWalletAddress]);
 
-  
-  //Checking wallet balance
-  async function getBalance( account: AptosAccount ) {
-    
-  }
 
   return (
     <>
@@ -51,7 +54,6 @@ export default function Wallet({setWalletAddress}:{setWalletAddress:any})  {
           <p>{address ? address : 'Connect Wallet'}</p>
         </button>
       </div>
-      {/* <button onClick={getBalance}>Get amount</button> */}
     </>
   );
 }
