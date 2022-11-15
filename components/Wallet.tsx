@@ -29,12 +29,13 @@ export default function Wallet({setWalletAddress}:{setWalletAddress:any})  {
     const client = new AptosClient('https://fullnode.devnet.aptoslabs.com');
     const coinClient = new CoinClient( client );
     try {
-      if ( isAptosDefined ) {
+      // if ( isAptosDefined ) {
           const response = await fetch( '/api/walletInfo', {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
           } )
-         await response.json() as Promise<WalletInfo>;
+        await response.json() as Promise<WalletInfo>;
+        
         setAddress( address )
         setWalletBalance(walletBalance)
         
@@ -45,7 +46,7 @@ export default function Wallet({setWalletAddress}:{setWalletAddress:any})  {
         // setWalletAddress( account.address );
         // setAccount(new AptosAccount(undefined, account.address));
         // console.log(account);
-      }
+      // }
       // const balance: bigint = await coinClient.checkBalance(account as AptosAccount);
       // setWalletAmount(Number(balance) / 10 ** 8);
       // setWalletBalance(Number(balance) / 10 ** 8);
