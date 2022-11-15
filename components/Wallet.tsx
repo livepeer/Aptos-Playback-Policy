@@ -15,7 +15,6 @@ export default function Wallet({setWalletAddress}:{setWalletAddress:any})  {
   const [walletAmount, setWalletAmount] = useState<Number>();
   const [ walletBalance, setWalletBalance ] = useState<Number>();
   
-  const [ walletA, setWalletA ] = useState(); 
 
   //Checking if wallet is injected into the window object
   const isAptosDefined = useMemo(
@@ -35,9 +34,9 @@ export default function Wallet({setWalletAddress}:{setWalletAddress:any})  {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
           } )
-        const data = await response.json();
-          console.log(data);
-        return data;
+         await response.json() as Promise<WalletInfo>;
+        setAddress( address )
+        setWalletBalance(walletBalance)
         
         // await window.aptos.connect();
         // const account = (await window.aptos.account()) as AptosAccountObject;
@@ -55,13 +54,13 @@ export default function Wallet({setWalletAddress}:{setWalletAddress:any})  {
     } catch (error) {
       console.log(error);
     }
-  }, [ isAptosDefined ] );
+  }, [ isAptosDefined, address, walletBalance ] );
   
   return (
     <>
       <div className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:outline-slate-800 text-aptos-green hover:text-gray-100 cursor-pointer'>
         <button onClick={connectWallet}>
-          <p>{walletA ? walletA : 'Connect Wallet'}</p>
+          <p>{address && walletBalance !== 0 ? address : 'Connect Wallet'}</p>
         </button>
       </div>
     </>
