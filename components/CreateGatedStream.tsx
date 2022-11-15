@@ -107,7 +107,7 @@ export default function CreateGatedStream({ walletAddress }: { walletAddress: st
             </button>
           </div>
           {/* Display Stream */}
-          {showStream && walletAmount > 0 ? (
+          {showStream ? (
             <div className='w-1/4'>
               <Player
                 title={stream?.name}
