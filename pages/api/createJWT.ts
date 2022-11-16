@@ -6,7 +6,6 @@ import { NextApiRequest, NextApiResponse } from 'next'
 export type CreateSignedPlaybackBody = {
   playbackId: string;
   secret: string;
-  walletAddress: string;
 }
 
 // Set type for revieving JWT
@@ -39,9 +38,6 @@ const handler = async ( req: NextApiRequest, res: NextApiResponse ) => {
         issuer: 'Aptos',
         playbackId,
         expiration: '1hr',
-        custom: {
-          walletAddress: req.body.walletAddress
-        }
       } )
       return res.status(200).json({token})
     }
