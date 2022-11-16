@@ -5,7 +5,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 export type WalletInfo = {
   address: any;
-  walletBalance?: number;
+  walletBalance: any;
 }
 
 const handler = async (req: NextApiRequest, res:NextApiResponse) => {
@@ -20,8 +20,10 @@ const handler = async (req: NextApiRequest, res:NextApiResponse) => {
       const balance: bigint = await coinClient.checkBalance(address as AptosAccount)
       const accountInfo = ({
         address,
-        walletBalance: Number(balance) / 10**8
-    } )
+        walletBalance: Number( balance ) / 10 ** 8
+        
+      } )
+      console.log(balance);
        return res.status(200).json(accountInfo)
       }
       res.setHeader('Allow', ['POST']);
