@@ -1,8 +1,5 @@
 ![Aptos](/public/Aptos.jpeg)
-
-# Aptos Playback Policy Guide 
-
-A guide to help utilize the Livepeer playback policy for a livesteam on the Aptos blockchain
+# Aptos Playback Policy Guide
 
 ## Set up
 
@@ -27,7 +24,7 @@ A guide to help utilize the Livepeer playback policy for a livesteam on the Apto
 - Install [LivepeerJS SDK](https://livepeerjs.org/)
     
     ```bash
-    npm i @livepeer/react 
+    npm i @livepeer/react
     ```
     
 
@@ -52,10 +49,12 @@ A guide to help utilize the Livepeer playback policy for a livesteam on the Apto
 ```markdown
 components
 	- CreateGatedStream.tsx
+	- ViewGatedStream.tsx
 	- Wallet.tsx
 pages
 	- api
-	  - createJWT.ts
+			- createJWT.ts
+			- walletInfo.ts
 	- _app.tsx
 	- index.tsx
 .env
@@ -82,6 +81,7 @@ PRIVTE_KEY="LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0hBZ0VBTUJNR0J5cUdTTTQ5QWdF
 NEXT_PUBLIC_LIVEPEER_API_KEY ="681dd957-9517-4d0b-9f87-945ee22e5d4e"
 NODE_URL = process.env.APTOS_NODE_URL || "https://fullnode.devnet.aptoslabs.com";
 FAUCET_URL = process.env.APTOS_FAUCET_URL || "https://faucet.devnet.aptoslabs.com";
+APTOS_PRIVATE_KEY ="0xdaf537544dea4642c213f272605640cba3774f616c28c4e1689a"
 ```
 
 # Configure Providers
@@ -121,6 +121,49 @@ const aptosClient = useMemo (() => new AptosClient('https://fullnode.devnet.apto
 }
 ```
 
+# Create API for getting wallet information
+
+## Api Directory
+
+- In `walletInfo.ts`
+
+```tsx
+import { CoinClient, AptosClient, AptosAccount, AptosAccountObject, HexString } from 'aptos';
+import { NextApiRequest, NextApiResponse } from 'next';
+
+export type WalletInfo = {
+  address: any;
+  walletBalance: any;
+}
+
+const handler = async (req: NextApiRequest, res:NextApiResponse) => {
+  const client = new AptosClient( 'https://fullnode.devnet.aptoslabs.com' );
+  const aptosAccount = new AptosAccount()
+  const coinClient = new CoinClient(client)
+
+  try {
+    const method = req.method;
+    if ( method === 'POST' ) {
+      const address = new AptosAccount(undefined, req.body.address)
+      const balance: bigint = await coinClient.checkBalance(address as AptosAccount)
+      const accountInfo = ({
+        address,
+        walletBalance: Number( balance ) / 10 ** 8
+      } )
+      console.log(balance);
+       return res.status(200).json(accountInfo)
+      }
+      res.setHeader('Allow', ['POST']);
+      return res.status(405).end(`Method ${method} Not Allowed`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: (error as Error)?.message ?? 'Error' }); 
+  }
+}
+
+export default handler;
+```
+
 # Create API for generating JWT
 
 ## Api Directory
@@ -136,7 +179,6 @@ import { NextApiRequest, NextApiResponse } from 'next'
 export type CreateSignedPlaybackBody = {
   playbackId: string;
   secret: string;
-  walletAddress: string;
 }
 
 // Set type for revieving JWT
@@ -160,7 +202,7 @@ const handler = async ( req: NextApiRequest, res: NextApiResponse ) => {
       if ( !playbackId || !secret ) {
         return res.status( 400 ).json( { message: 'Missing data in body.' } );
       }
-      if ( secret !== 'supersecretkey' ) {
+      if ( secret !== req.body.walletAddress ) {
         return res.status(401).json({message: 'Incorrect secret.'})
       }
       const token = await signAccessJwt( {
@@ -169,9 +211,6 @@ const handler = async ( req: NextApiRequest, res: NextApiResponse ) => {
         issuer: 'Aptos',
         playbackId,
         expiration: '1hr',
-        custom: {
-          walletAddress: req.body.walletAddress
-        }
       } )
       return res.status(200).json({token})
     }
@@ -200,8 +239,9 @@ export default handler;
 - The wallet must be connected and have a specific amount of Aptos coins
 
 ```tsx
-import React, { useCallback, useState, useMemo } from 'react';
-import { CoinClient, AptosClient, AptosAccount } from 'aptos';
+import React, { useState, useMemo, useCallback} from 'react';
+import {  AptosAccountObject } from 'aptos';
+import { WalletInfo } from '../pages/api/walletInfo';
 
 declare global {
   interface Window {
@@ -209,37 +249,51 @@ declare global {
   }
 }
 
-export default function Wallet() {
-  const [ address, setAddress ] = useState<string>();
-
-//Checking if wallet is injected into the window object
+export default function Wallet({setWalletAddress}:{setWalletAddress:any}, {setWalletAmount}:{setWalletAmount: any})  {
+  const [address, setAddress] = useState<any>();
+  const [balance, setBalance] = useState<any>();
+  
+  //Checking if wallet is injected into the window object
   const isAptosDefined = useMemo(
     () => (typeof window !== 'undefined' ? Boolean(window?.aptos) : false),
     []
   );
 
-//Connecting the wallet 
-  const connectWallet = useCallback(async () => {
+  //Connecting the wallet
+  const connectWallet = useCallback( async () => {
     try {
-      if (isAptosDefined) {
-        await window.aptos.connect();
-        const account: { address: string } = await window.aptos.account();
-        setAddress(account.address);
-        console.log();
+      if ( isAptosDefined ) {
+        const account = (await window.aptos.account()) as AptosAccountObject;
+        const accountAddress = account.address;
+        const response = await fetch('/api/walletInfo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            address: accountAddress,
+          }),
+        });
+        const data = ( await response.json() ) as Promise<WalletInfo>;
+        setAddress( ( await data ).address.accountAddress.hexString );
+        setBalance((await data).walletBalance);
+        // Using as props for CreateGatedStream
+        setWalletAddress((await data).address.accountAddress.hexString);
+        setWalletAmount( ( await data ).walletBalance );
       }
     } catch (error) {
       console.log(error);
     }
-  }, [ isAptosDefined ] );
+  }, [ isAptosDefined, setWalletAddress, setWalletAmount] );
   
-
   return (
     <>
-      <div className='overflow-hidden w-40'>
-        <button onClick={ connectWallet }>
-          <p>{ address ?   address  : 'Connect Wallet' }</p>
+      <div className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:outline-slate-800 text-aptos-green hover:text-gray-100 cursor-pointer'>
+        <button onClick={connectWallet}>
+          <div>
+            <p>{address ? address : 'Connect Wallet'}</p>
+            <p>{balance ? <p>Balance: {balance}</p> : null}</p>
+          </div>
         </button>
-        </div>
+      </div>
     </>
   );
 }
@@ -259,8 +313,10 @@ import { useMemo, useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { CreateSignedPlaybackBody, CreateSignedPlaybackResponse } from '../pages/api/createJWT';
 
-export default function CreateGatedStream( { walletAddress }: { walletAddress: string } ) {
-  const [ showInfo, setShowInfo ] = useState<boolean>( false );
+export default function CreateGatedStream({ walletAddress }: { walletAddress: string }, {walletAmount}: {walletAmount: any}) {
+  const [showInfo, setShowInfo] = useState<boolean>(false);
+  const [ showStream, setShowStream ] = useState<boolean>( false );
+  
   // Create stream with LivepeerJS hook
   const [streamName, setStreamName] = useState<string>('');
   const {
@@ -292,8 +348,8 @@ export default function CreateGatedStream( { walletAddress }: { walletAddress: s
       // Create stream information for JWT payload
       const body: CreateSignedPlaybackBody = {
         playbackId: stream.playbackId,
-        secret: 'supersecretkey',
-        walletAddress: walletAddress
+        secret: walletAddress,
+        
       };
 
       const response = await fetch('/api/createJWT', {
@@ -312,7 +368,17 @@ export default function CreateGatedStream( { walletAddress }: { walletAddress: s
     }
   }, [stream?.playbackId, createJwt, walletAddress]);
 
-  const isLoading = useMemo(() => status === 'loading', [status]);
+  const isLoading = useMemo( () => status === 'loading', [ status ] );
+  
+  const viewStream = async () => {
+    setShowStream(true)
+    setShowInfo( false )
+  }
+
+   const viewStreamInfo = async () => {
+     setShowInfo(true);
+     setShowStream(false);
+   };
 
   return (
     <>
@@ -336,22 +402,33 @@ export default function CreateGatedStream( { walletAddress }: { walletAddress: s
         </div>
       ) : (
         <>
-          <h1 className='text-aptos-green font-bold text-xl my-5 underline'>Stream Preview </h1>
-          <div className='w-1/4'>
-            <Player
-              title={stream?.name}
-              playbackId={stream?.playbackId}
-              showPipButton
-              jwt={(createdJwt as CreateSignedPlaybackResponse)?.token}
-            />
+          <div>
+            <button
+              onClick={viewStream}
+              className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:outline-slate-800 text-aptos-green hover:text-gray-100 cursor-pointer'
+            >
+              View Stream
+            </button>
+            <button
+              onClick={(viewStreamInfo)}
+              className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:outline-slate-800 text-aptos-green hover:text-gray-100 cursor-pointer'
+            >
+              Stream Info
+            </button>
           </div>
+            {/* Display Stream */ }
+          {showStream  ? (
+            <div className='w-1/4'>
+              <Player
+                title={stream?.name}
+                playbackId={stream?.playbackId}
+                showPipButton
+                jwt={(createdJwt as CreateSignedPlaybackResponse)?.token}
+              />
+            </div>
+          ) : null}
 
-          <button
-            onClick={()=>setShowInfo(!showInfo)}
-            className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:outline-slate-800 text-aptos-green hover:text-gray-100 cursor-pointer'
-          >
-            Stream Info
-          </button>
+          {/* Display Stream Info */}
           <div className='flex-flex-col w-1/4'>
             {showInfo ? (
               <div className='rounded outline outline-offset-2 outline-2 outline-aptos-green p-4 m-4 text-xl bg-slate-800 overflow-scroll'>
@@ -408,16 +485,15 @@ import aptosImage from '../public/Aptos.jpeg'
 import {useState} from 'react'
 import styles from '../styles/Home.module.css';
 import 'tailwindcss/tailwind.css';
+import Wallet from '../components/Wallet';
 import CreateGatedStream from '../components/CreateGatedStream';
-import Wallet from '../components/Wallet'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const queryClient = new QueryClient();
-
 export default function Home() {
-  const [ walletAddress, setWalletAddress ] = useState();
-  // console.log(walletAddress);
   
+  const queryClient = new QueryClient();
+  const [walletAddress, setWalletAddress] = useState<string>();
+  const [walletAmount, setWalletAmount] = useState<number>();
 
   return (
     <div className={styles.container}>
@@ -428,16 +504,23 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <Image src={aptosImage} alt='Aptos Logo' width={1000} height={400} priority/>
+        <Image src={aptosImage} alt='Aptos Logo' width={1000} height={400} priority />
         <h1 className={styles.title}>
           Welcome to <span className='text-aptos-green'>Aptos</span> Playback Policy
         </h1>
-        <Wallet setWalletAddress={setWalletAddress} />
+
+        <Wallet
+          setWalletAddress={ setWalletAddress }
+          setWalletAmount={ setWalletAmount }
+        />
         {walletAddress ? (
           <QueryClientProvider client={queryClient}>
-            <CreateGatedStream walletAddress={ walletAddress } />
+            <CreateGatedStream
+              walletAddress={ walletAddress }
+              walletAmount={walletAmount}
+            />
           </QueryClientProvider>
-        ) : null} 
+        ) : null}
       </main>
     </div>
   );
