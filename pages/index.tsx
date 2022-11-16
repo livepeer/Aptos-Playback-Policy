@@ -12,8 +12,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 export default function Home() {
   
   const queryClient = new QueryClient();
-  const [walletAddress, setWalletAddress] = useState();
-  const [walletAmount, setWalletAmount] = useState();
+  const [walletAddress, setWalletAddress] = useState<string>();
+  const [walletAmount, setWalletAmount] = useState<number>();
 
   return (
     <div className={styles.container}>
@@ -31,13 +31,13 @@ export default function Home() {
 
         <Wallet
           setWalletAddress={ setWalletAddress }
-        //setWalletAmount={ setWalletAmount }
+          setWalletAmount={ setWalletAmount }
         />
         {walletAddress ? (
           <QueryClientProvider client={queryClient}>
             <CreateGatedStream
               walletAddress={ walletAddress }
-              //{walletAmount={walletAmount}}
+              walletAmount={walletAmount}
             />
           </QueryClientProvider>
         ) : null}
