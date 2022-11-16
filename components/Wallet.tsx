@@ -8,9 +8,9 @@ declare global {
   }
 }
 
-
 export default function Wallet({setWalletAddress}:{setWalletAddress:any}, {setWalletAmount}:{setWalletAmount: any})  {
   const [address, setAddress] = useState<any>();
+  const [balance, setBalance] = useState<any>();
   
   //Checking if wallet is injected into the window object
   const isAptosDefined = useMemo(
@@ -34,22 +34,23 @@ export default function Wallet({setWalletAddress}:{setWalletAddress:any}, {setWa
         });
         const data = ( await response.json() ) as Promise<WalletInfo>;
         setAddress( ( await data ).address.accountAddress.hexString );
+        setBalance((await data).walletBalance);
         // Using as props for CreateGatedStream
         setWalletAddress((await data).address.accountAddress.hexString);
-        setWalletAmount((await data).walletBalance);
+        setWalletAmount( ( await data ).walletBalance );
       }
-      
     } catch (error) {
       console.log(error);
     }
-  }, [ isAptosDefined, setWalletAddress, setWalletAmount ] );
+  }, [ isAptosDefined, setWalletAddress, setWalletAmount] );
   
   return (
     <>
       <div className='rounded outline outline-offset-2 outline-1 outline-aptos-green p-4 m-4 text-xl bg-slate-800 hover:outline-slate-800 text-aptos-green hover:text-gray-100 cursor-pointer'>
         <button onClick={connectWallet}>
           <div>
-            <p>{ address ? address : 'Connect Wallet' }</p>
+            <p>{address ? address : 'Connect Wallet'}</p>
+            <p>{balance ? <p>Balance: {balance}</p> : null}</p>
           </div>
         </button>
       </div>
