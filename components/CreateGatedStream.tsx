@@ -6,7 +6,8 @@ import { CreateSignedPlaybackBody, CreateSignedPlaybackResponse } from '../pages
 
 export default function CreateGatedStream({ walletAddress }: { walletAddress: string }, {walletAmount}: {walletAmount: any}) {
   const [showInfo, setShowInfo] = useState<boolean>(false);
-  const [showStream, setShowStream] = useState<boolean>(false);
+  const [ showStream, setShowStream ] = useState<boolean>( false );
+  
   // Create stream with LivepeerJS hook
   const [streamName, setStreamName] = useState<string>('');
   const {
@@ -39,7 +40,7 @@ export default function CreateGatedStream({ walletAddress }: { walletAddress: st
       const body: CreateSignedPlaybackBody = {
         playbackId: stream.playbackId,
         secret: walletAddress,
-        walletAddress: walletAddress,
+        
       };
 
       const response = await fetch('/api/createJWT', {
@@ -61,8 +62,8 @@ export default function CreateGatedStream({ walletAddress }: { walletAddress: st
   const isLoading = useMemo( () => status === 'loading', [ status ] );
   
   const viewStream = async () => {
-    setShowInfo( false )
     setShowStream(true)
+    setShowInfo( false )
   }
 
    const viewStreamInfo = async () => {
@@ -106,8 +107,8 @@ export default function CreateGatedStream({ walletAddress }: { walletAddress: st
               Stream Info
             </button>
           </div>
-          {/* Display Stream */}
-          {showStream ? (
+            {/* Display Stream */ }
+          {showStream  ? (
             <div className='w-1/4'>
               <Player
                 title={stream?.name}
